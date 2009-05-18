@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.prefs.Preferences;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.SingleFrameApplication;
 import org.jdesktop.application.FrameView;
@@ -56,6 +57,7 @@ public class KMLConverterView extends FrameView implements KeyListener {
         initComponents();
         setTableSelectionListeners();
         mainTable.addKeyListener(this);
+        prefs = Preferences.userNodeForPackage(KMLConverterView.class);
     }
 
     private void setTableSelectionListeners() {
@@ -109,12 +111,14 @@ public class KMLConverterView extends FrameView implements KeyListener {
      */
     @Action
     public void openFile() throws FileNotFoundException, IOException, WrongFileException {
-        //TODO Remove before deployment
-//        chooser.setCurrentDirectory(new File(System.getProperty("user.dir") + "/dist"));
-        chooser.setCurrentDirectory(new File(System.getProperty("user.dir")));
+        //XXX: test what happens when application is run for the first time and
+        //there is nothing stored in preferences
+        File currentDirectory = new File(prefs.get("LAST_IMPORT_DIR",
+                System.getProperty("user.dir")));
+        chooser.setCurrentDirectory(currentDirectory);
         int returnVal = chooser.showOpenDialog(jLabelDataFile);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-
+            prefs.put("LAST_IMPORT_DIR", chooser.getCurrentDirectory().toString());
             ButtonGroup group = new javax.swing.ButtonGroup();
             String question = "Please select CSV file delimiter:";
             JRadioButton commaJRadioButton = new javax.swing.JRadioButton("Comma separated");
@@ -151,7 +155,6 @@ public class KMLConverterView extends FrameView implements KeyListener {
                 ArrayList<String> header = parseCSV.openFileGetHeaders(fileName, currentFileDelimeter);
                 kmlTableModel = new KMLjTableModel(header, data);
                 mainTable.setModel(kmlTableModel);
-                rememberCurrentDirectory();
                 setColumnSizes();
                 statusBar.setMessage("File imported successfully. All columns were set to 'description'");
 
@@ -521,12 +524,14 @@ public class KMLConverterView extends FrameView implements KeyListener {
                     exportErrorsString, "Export Error", JOptionPane.WARNING_MESSAGE);
             return;
         }
-
+        File currentDirectory = new File(prefs.get("LAST_SAVE_DIR",
+                System.getProperty("user.dir")));
+        chooser.setCurrentDirectory(currentDirectory);
         chooser.setFileFilter(kmlFileFilter);
         chooser.setSelectedFile(new File(currentFileName + ".kml"));
         int returnVal = chooser.showSaveDialog(null);
         if (returnVal == JFileChooser.APPROVE_OPTION) {
-
+            prefs.put("LAST_SAVE_DIR", chooser.getCurrentDirectory().toString());
             File fFile = chooser.getSelectedFile();
             if (fFile.exists()) {
                 int response = JOptionPane.showConfirmDialog(null,
@@ -542,7 +547,7 @@ public class KMLConverterView extends FrameView implements KeyListener {
             try {
 
                 //get all unique folder names
-                HashSet folderNamesSet = new HashSet();
+                HashSet<String> folderNamesSet = new HashSet<String>();
                 for (int col = 0; col <= mainTable.getColumnCount() - 1; col++) {
                     if (columnStatus.get(col).equals("Folder Name")) {
                         for (int i = 0; i < mainTable.getRowCount(); i++) {
@@ -944,4 +949,5 @@ public class KMLConverterView extends FrameView implements KeyListener {
     String currentFileName;
     KMLFileFilter kmlFileFilter;
     TXTFileFilter txtFileFilter;
+    Preferences prefs;
 }
