@@ -1,0 +1,39 @@
+/* Formatting specific to the NextCoffee application */
+
+body {
+  padding: 10px;
+}
+
+/* stock list header row */
+.clientsFlexTableHeader {
+  background-color: #2062B8;
+  color: white;
+  font-style: italic;
+}
+
+/* stock list flex table */
+.clientsFlexTableList {
+  border: 1px solid silver;
+  padding: 2px;
+  margin-bottom:6px;
+}
+
+/* client list coffee cup fields */
+.clientsFlexTableImageColumn {
+  image-align: center;
+  width:8em;
+  background-color: #2062B8;
+}
+
+.gwt-SuggestBoxPopup {
+  border: 2px solid #C3D9FF;
+}
+
+.gwt-SuggestBoxPopup .item {
+  padding: 2px;
+}
+
+.gwt-SuggestBoxPopup .item-selected {
+  background-color: #C3D9FF;
+  padding: 2px;
+}
